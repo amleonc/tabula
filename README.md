@@ -3,5 +3,5 @@ Simple web forum.
 
 ## Stack
 - Postgres
-- Bun (ORM)
-- Echo (Webserver)
+- Bun [Link](https.//bun.uptrace.dev)
+- Echo [Link](https://echo.labstack.com)
