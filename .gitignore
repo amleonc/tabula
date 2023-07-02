@@ -1,0 +1,5 @@
+# Don't leak secrets!
+config.toml
+
+# JetBrains stuff
+.idea
