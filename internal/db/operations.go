@@ -61,6 +61,7 @@ func SelectMultiple[T Record](
 ) error {
 	return db.NewSelect().
 		Model(target).
+		Column(selectCols...).
 		Where("? > ?", bun.Ident(lookupCol), searchVal).
 		Limit(limit).
 		Scan(ctx)
