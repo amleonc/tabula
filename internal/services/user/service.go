@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"log"
+	"strings"
 
 	ev "github.com/amleonc/evalrunes"
 	"github.com/amleonc/tabula/internal/dao"
@@ -57,14 +58,10 @@ type serviceStruct struct {
 var service = &serviceStruct{internal.Repository{}}
 
 func (s *serviceStruct) Signup(ctx context.Context, u *dto.User) (*dto.User, error) {
-	var ok bool
-	if ok = validateName(u.Name); !ok {
-		return nil, newCredentialsError(invalidName)
-	}
-	if ok = validatePassword(u.Password); !ok {
-		return nil, newCredentialsError(invalidPassword)
-	}
 	var err error
+	if err = validateNewUser(u); err != nil {
+		return nil, err
+	}
 	u.Password, err = saltPassword(u.Password)
 	if err != nil {
 		return nil, err
@@ -74,7 +71,7 @@ func (s *serviceStruct) Signup(ctx context.Context, u *dto.User) (*dto.User, err
 		Password: u.Password,
 		Role:     AnonRole,
 	}
-	userFromDB, err = s.repo.Create(ctx, userFromDB)
+	err = s.repo.Create(ctx, userFromDB)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +99,19 @@ func (s *serviceStruct) Login(ctx context.Context, u *dto.User) (*dto.User, erro
 	u.UpdatedAt = userFromDB.UpdatedAt
 	u.DeletedAt = nil
 	return u, nil
+}
+
+func validateNewUser(u *dto.User) error {
+	var ok bool
+	u.Name = strings.TrimSpace(u.Name)
+	if ok = validateName(u.Name); !ok {
+		return newCredentialsError(invalidName)
+	}
+	u.Password = strings.TrimSpace(u.Password)
+	if ok = validatePassword(u.Password); !ok {
+		return newCredentialsError(invalidPassword)
+	}
+	return nil
 }
 
 func validateName(n string) bool {

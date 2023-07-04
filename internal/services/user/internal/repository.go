@@ -9,9 +9,9 @@ import (
 
 type Repository struct{}
 
-func (Repository) Create(ctx context.Context, u *dao.User) (*dao.User, error) {
+func (Repository) Create(ctx context.Context, u *dao.User) error {
 	err := db.Insert(ctx, u)
-	return u, err
+	return err
 }
 
 func (Repository) SelectByName(ctx context.Context, n string) (*dao.User, error) {

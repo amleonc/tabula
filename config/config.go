@@ -27,6 +27,10 @@ func AppEnv() string {
 	return c.GetString("app.env")
 }
 
+func PrivateKeyPath() string {
+	return c.GetString("app.priv_key")
+}
+
 func DatabaseUser() string {
 	return c.GetString("database.user")
 }
@@ -53,4 +57,20 @@ func DatabaseSSLMode() string {
 
 func ServerPort() int {
 	return c.GetInt("server.port")
+}
+
+func ThumbnailFormat() string {
+	return c.GetString("media.thumb_format")
+}
+
+func ThumbnailSize() string {
+	return c.GetString("media.thumb_size")
+}
+
+func UploadsDir() string {
+	return c.GetString("media.upload_dir")
+}
+
+func UserIdKey() string {
+	return c.GetString("app.user_id_key")
 }

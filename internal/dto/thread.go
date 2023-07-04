@@ -14,6 +14,7 @@ type Thread struct {
 	Title     string
 	Body      string
 	NSFW      bool
+	Comments  []*Comment
 	CreatedAt *time.Time
 	UpdatedAt *time.Time
 	DeletedAt *time.Time

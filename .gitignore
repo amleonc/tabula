@@ -1,5 +1,6 @@
 # Don't leak secrets!
 config.toml
+certs
 
 # JetBrains stuff
 .idea
