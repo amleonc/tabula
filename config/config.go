@@ -74,3 +74,9 @@ func UploadsDir() string {
 func UserIdKey() string {
 	return c.GetString("app.user_id_key")
 }
+
+func ContextKey() CtxKey {
+	return CtxKey{}
+}
+
+type CtxKey struct{}
