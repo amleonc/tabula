@@ -22,6 +22,7 @@ import (
 
 type Service interface {
 	Create(context.Context, *dto.Media) (*dto.Media, error)
+	GetByID(context.Context, string) (*dto.Media, error)
 }
 
 type serviceStruct struct {
@@ -88,13 +89,13 @@ func (s *serviceStruct) Create(ctx context.Context, m *dto.Media) (*dto.Media, e
 		return nil, newMediaError(errInvalidFormat)
 	}
 	fileName := buildFileName(id, extension)
-	_, _ = f.Seek(0, 0)
+	_, _ = f.Seek(0, io.SeekStart)
 	err = fs.SaveToDisk(f, fileName)
 	if err != nil {
 		return nil, err
 	}
 	thumbnailFilename := buildFileName(thumbnailPrefix+id, thumbnailFormat)
-	err = generateThumbnail(fileName, thumbnailFilename, fileType)
+	err = generateThumbnail(fileName, thumbnailFilename)
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +105,15 @@ func (s *serviceStruct) Create(ctx context.Context, m *dto.Media) (*dto.Media, e
 		return nil, err
 	}
 	m = daoToDto(r)
+	return m, nil
+}
+
+func (s *serviceStruct) GetByID(ctx context.Context, id string) (*dto.Media, error) {
+	r, err := s.repo.Select(ctx, &dao.Media{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	m := daoToDto(r)
 	return m, nil
 }
 
@@ -174,47 +184,43 @@ func validateFileExtension(ext string) bool {
 	}
 }
 
-func isBlacklisted(m *dao.Media) error {
-	switch m.Blacklist {
-	case true:
-		return newMediaError(errForbidden)
-	default:
-		return nil
-	}
-}
+func isBlacklisted(m *dao.Media) error { // -
+	switch m.Blacklist { // -----------------
+	case true: // ---------------------------
+		return newMediaError(errForbidden) //
+	default: // -----------------------------
+		return nil // ------------------------
+	} // -------------------------------------
+} // -----------------------------------------
 
 func daoToDto(daom *dao.Media) *dto.Media {
 	m := &dto.Media{
-		ID:                daom.ID,
-		Filename:          fmt.Sprintf("%s.%s", daom.ID, daom.Extension),
-		ThumbnailFilename: fmt.Sprintf("%s%s.%s", thumbnailPrefix, daom.ID, defaultThumbnailFormat),
-		Type:              daom.Type,
-		Format:            daom.Extension,
-		Blacklist:         daom.Blacklist,
-		CreatedAt:         daom.CreatedAt,
-		UpdatedAt:         daom.UpdatedAt,
+		ID:           daom.ID,
+		Url:          fmt.Sprintf("%s.%s", daom.ID, daom.Extension),
+		ThumbnailUrl: fmt.Sprintf("%s%s.%s", thumbnailPrefix, daom.ID, defaultThumbnailFormat),
+		Type:         daom.Type,
+		Format:       daom.Extension,
+		Blacklist:    daom.Blacklist,
+		CreatedAt:    daom.CreatedAt,
+		UpdatedAt:    daom.UpdatedAt,
 	}
 	return m
 }
 
-func generateThumbnail(name, thumb, fileType string) error {
+func generateThumbnail(name, thumb string) error {
 	scale := thumbnailSize
 	args := make([]string, 0)
 	args = append(
 		args,
 		"-i", name,
+		"-vf", "select=eq(n\\,0)",
+		"-vf", fmt.Sprintf("scale=%s:force_original_aspect_ratio=decrease", scale),
+		"-vframes", "1",
+		thumb,
 	)
-	if fileType == "video" {
-		args = append(args, "-vf", "select=eq(n\\,0)")
-	}
-	args = append(args, "-vf", fmt.Sprintf("scale=%s:force_original_aspect_ratio=decrease", scale))
-	if fileType == "video" {
-		args = append(args, "-frames:v", "1")
-	}
-	args = append(args, thumb)
 	cmd := exec.Command("ffmpeg", args...)
 	err := cmd.Run()
-	if err != nil {
+	if err != nil && err.Error() != "exit status 1" {
 		return err
 	}
 	return nil

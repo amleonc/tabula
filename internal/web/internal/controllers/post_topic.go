@@ -16,11 +16,10 @@ func PostTopic(c echo.Context) error {
 		formFileName  = "file"
 		formValueName = "topic"
 	)
-	form, err := c.MultipartForm()
+	formFile, err := c.FormFile(formFileName)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.NewErrorResponse(http.StatusBadRequest, err))
 	}
-	formFile := form.File[formFileName][0]
 	file, err := formFile.Open()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.NewErrorResponse(http.StatusBadRequest, err))

@@ -33,3 +33,5 @@ func initDB() *bun.DB {
 	}
 	return db
 }
+
+type Filter map[string]any

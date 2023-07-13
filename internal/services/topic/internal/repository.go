@@ -19,5 +19,5 @@ func (Repository) Create(ctx context.Context, t *dao.Topic) error {
 }
 
 func (Repository) SelectOneByID(ctx context.Context, id uuid.UUID) (*dao.Topic, error) {
-	return db.SelectOne(ctx, &dao.Topic{}, "id", id, "*")
+	return db.SelectOne(ctx, &dao.Topic{}, db.Filter{"id": id}, "*")
 }

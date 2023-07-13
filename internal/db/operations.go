@@ -36,33 +36,53 @@ func Insert[T Record](ctx context.Context, thing T) error {
 func SelectOne[T Record](
 	ctx context.Context,
 	target T,
-	lookupCol string,
-	searchVal any,
+	filter Filter,
 	selectCols ...string,
 ) (T, error) {
-	err := db.NewSelect().
+	query := db.NewSelect().
 		Model(target).
-		Column(selectCols...).
-		Where("? = ?", bun.Ident(lookupCol), searchVal).
-		Scan(ctx)
+		Column(selectCols...)
+	for k, v := range filter {
+		query.Where("? = ?", bun.Ident(k), v)
+	}
+	err := query.Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return target, nil
 }
 
+const (
+	defaultLimit = 40
+)
+
 func SelectMultiple[T Record](
 	ctx context.Context,
-	target []T,
-	lookupCol string,
-	searchVal any,
+	target *[]T,
+	filter map[string]any,
 	limit int,
 	selectCols ...string,
 ) error {
-	return db.NewSelect().
+	query := db.NewSelect().
 		Model(target).
-		Column(selectCols...).
-		Where("? > ?", bun.Ident(lookupCol), searchVal).
-		Limit(limit).
-		Scan(ctx)
+		Column(selectCols...)
+
+	for k, v := range filter {
+		query.Where("? = ?", bun.Ident(k), v)
+	}
+
+	if limit == 0 {
+		limit = defaultLimit
+	}
+	query.Limit(limit)
+
+	return query.Scan(ctx)
+}
+
+func NewSelectQuery() *bun.SelectQuery {
+	return db.NewSelect()
+}
+
+func NewInsertQuery() *bun.InsertQuery {
+	return db.NewInsert()
 }

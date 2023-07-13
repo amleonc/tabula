@@ -9,7 +9,7 @@ import (
 
 type User struct {
 	bun.BaseModel `bun:"table:users"`
-	ID            uuid.UUID  `bun:"type:uuid,default:uuid_generate_v4()"`
+	ID            uuid.UUID  `bun:"type:uuid,default:gen_random_uuid()"`
 	Name          string     `bun:",unique,notnull"`
 	Password      string     `bun:",nullzero,notnull"`
 	Role          int64      `bun:",nullzero,notnull,default:3"`

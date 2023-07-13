@@ -20,15 +20,8 @@ func (Repository) SelectByName(ctx context.Context, n string) (*dao.User, error)
 	u, err = db.SelectOne[*dao.User](
 		ctx,
 		u,
-		"name",
-		n,
-		"id",
-		"name",
-		"password",
-		"role",
-		"created_at",
-		"updated_at",
-		"deleted_at",
+		db.Filter{"name": n},
+		"*",
 	)
 	return u, err
 }

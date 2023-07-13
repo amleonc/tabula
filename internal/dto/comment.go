@@ -10,10 +10,10 @@ type Comment struct {
 	ID        uuid.UUID  `json:"id,omitempty"`
 	Media     *Media     `json:"media,omitempty"`
 	Thread    uuid.UUID  `json:"thread,omitempty"`
-	User      uuid.UUID  `json:"user,omitempty"`
+	User      uuid.UUID  `json:"-"`
 	Grip      string     `json:"grip,omitempty"`
 	Body      string     `json:"body,omitempty"`
-	Color     uint8      `json:"color,omitempty"`
+	Color     uint8      `json:"color"`
 	IsOP      bool       `json:"is_op,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`

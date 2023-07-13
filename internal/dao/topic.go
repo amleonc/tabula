@@ -9,7 +9,7 @@ import (
 
 type Topic struct {
 	bun.BaseModel `bun:"table:topics"`
-	ID            uuid.UUID  `bun:"type:uuid,default:uuid_generate_v4()"`
+	ID            uuid.UUID  `bun:"type:uuid,default:gen_random_uuid()"`
 	User          uuid.UUID  `bun:",notnull"`
 	Media         string     `bun:",notnull"`
 	Title         string     `bun:",unique,notnull"`

@@ -37,7 +37,7 @@ const (
 	MinThreadBodyLen  = 1
 	MaxThreadBodyLen  = 3000
 
-	limitQuery = 40
+	limitResults = 40
 )
 
 // ------------ Variables ------------ //
@@ -116,22 +116,29 @@ func (s *serviceStruct) GetOneByID(ctx context.Context, id uuid.UUID) (*dto.Thre
 	if err2 != nil {
 		return nil, err2
 	}
+	m, err := ms.GetByID(ctx, daoT.Media)
+	if err != nil {
+		return nil, err
+	}
 	t := daoToDto(daoT)
+	t.Media = m
 	t.Comments = comments
 	return t, nil
 }
 
 func (s *serviceStruct) GetByTopicID(ctx context.Context, id uuid.UUID) ([]*dto.Thread, error) {
-	daoThreads, err := s.repo.SelectByTopicID(ctx, id, limitQuery)
+	daoThreads, err := s.repo.SelectByTopicID(ctx, id, limitResults)
 	if err != nil {
 		return nil, err
-	}
-	for _, v := range daoThreads {
-		v.User = uuid.UUID{}
 	}
 	dtoThreads := make([]*dto.Thread, len(daoThreads))
 	for i, daot := range daoThreads {
 		dtoThreads[i] = daoToDto(daot)
+		m, err := ms.GetByID(ctx, daot.Media)
+		if err != nil {
+			return nil, err
+		}
+		dtoThreads[i].Media = m
 	}
 	return dtoThreads, nil
 }
@@ -191,14 +198,17 @@ func validateThreadBodyLen(b string) bool {
 	) && ev.ValidateRuneArrayLength(r, MinThreadBodyLen, MaxThreadBodyLen)
 }
 
-func daoToDto(daoT *dao.Thread) *dto.Thread {
+func daoToDto(daot *dao.Thread) *dto.Thread {
 	dtoT := &dto.Thread{
-		ID:        daoT.ID,
-		Topic:     daoT.Topic,
-		User:      daoT.User,
+		ID:        daot.ID,
+		Topic:     daot.Topic,
+		User:      daot.User,
+		Title:     daot.Title,
+		Body:      daot.Body,
+		NSFW:      daot.NSFW,
 		Comments:  nil,
-		CreatedAt: daoT.CreatedAt,
-		UpdatedAt: daoT.UpdatedAt,
+		CreatedAt: daot.CreatedAt,
+		UpdatedAt: daot.UpdatedAt,
 	}
 	return dtoT
 }

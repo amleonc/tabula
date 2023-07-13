@@ -85,21 +85,17 @@ func (s *serviceStruct) ReadOneView(ctx context.Context, id uuid.UUID) (*dto.Top
 	if err != nil {
 		return nil, err
 	}
+	m, err := ms.GetByID(ctx, daot.Media)
+	if err != nil {
+		return nil, err
+	}
 	threads, err := ts.GetByTopicID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	t := &dto.Topic{
-		ID:         daot.ID,
-		Media:      nil,
-		Title:      daot.Title,
-		ShortTitle: daot.ShortTitle,
-		NSFW:       daot.NSFW,
-		MaxThreads: daot.MaxThreads,
-		Threads:    threads,
-		CreatedAt:  daot.CreatedAt,
-		UpdatedAt:  daot.UpdatedAt,
-	}
+	t := daoToDto(daot)
+	t.Threads = threads
+	t.Media = m
 	return t, nil
 }
 
@@ -151,4 +147,17 @@ func validateTopicShortTitle(s string) bool {
 
 func validateThreadCapacity(c int64) bool {
 	return MinThreads <= c && c <= MaxThreads
+}
+
+func daoToDto(daot *dao.Topic) *dto.Topic {
+	t := &dto.Topic{
+		ID:         daot.ID,
+		Title:      daot.Title,
+		ShortTitle: daot.ShortTitle,
+		NSFW:       daot.NSFW,
+		MaxThreads: daot.MaxThreads,
+		CreatedAt:  daot.CreatedAt,
+		UpdatedAt:  daot.UpdatedAt,
+	}
+	return t
 }

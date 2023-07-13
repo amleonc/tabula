@@ -5,7 +5,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/amleonc/tabula/config"
 	"github.com/amleonc/tabula/internal/dao"
 	"github.com/amleonc/tabula/internal/dto"
 	"github.com/amleonc/tabula/internal/helpers"
@@ -34,9 +33,9 @@ type ServiceError struct {
 const (
 	GripLength = 7
 
-	probGroup1 = 4
-	probGroup2 = 1
-	probGroup3 = 1
+	probGroup1 = 20
+	probGroup2 = 3
+	probGroup3 = 2
 	probGroup4 = 1
 
 	limitResults = 20
@@ -47,8 +46,6 @@ const (
 var (
 	ms = media.GetService()
 
-	userID = config.UserIdKey()
-
 	colorRandomizer = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	service = newService()
@@ -58,39 +55,47 @@ var (
 
 func (s *serviceStruct) Create(ctx context.Context, c *dto.Comment) (*dto.Comment, error) {
 	var err error
-	c.Media, err = ms.Create(ctx, c.Media)
+	m, err := ms.Create(ctx, c.Media)
 	if err != nil {
 		return nil, err
 	}
 	c.Grip = generateGrip()
 	c.Color = randColor()
 	daoC := &dao.Comment{
-		Media:  c.Media.ID,
+		Media:  m.ID,
 		Thread: c.Thread,
 		User:   c.User,
 		Grip:   c.Grip,
 		Body:   c.Body,
 		Color:  c.Color,
-		IsOP:   c.IsOP,
+	}
+	if err != nil {
+		return nil, err
 	}
 	err = s.repo.Create(ctx, daoC)
 	if err != nil {
 		return nil, err
 	}
-	c.ID = daoC.ID
-	c.CreatedAt = daoC.CreatedAt
-	c.UpdatedAt = daoC.UpdatedAt
+	c = toDtoComment(daoC)
+	c.Media = m
 	return c, nil
 }
 
 func (s *serviceStruct) GetThreadComments(ctx context.Context, id uuid.UUID) ([]*dto.Comment, error) {
-	daoc, err := s.repo.SelectByThreadID(ctx, id, limitResults)
+	daoComments, err := s.repo.SelectByThreadID(ctx, id, limitResults)
 	if err != nil {
 		return nil, err
 	}
-	dtoc := toDtoComment(daoc...)
-	isOP(ctx.Value(userID).(uuid.UUID), dtoc...)
-	return dtoc, nil
+	dtoComments := make([]*dto.Comment, len(daoComments))
+	for i, daoc := range daoComments {
+		dtoComments[i] = toDtoComment(daoc)
+		m, err := ms.GetByID(ctx, daoc.Media)
+		if err != nil {
+			return nil, err
+		}
+		dtoComments[i].Media = m
+	}
+	return dtoComments, nil
 }
 
 func (s ServiceError) Error() string {
@@ -139,24 +144,17 @@ func randColor() uint8 {
 	}
 }
 
-func toDtoComment(daoC ...*dao.Comment) []*dto.Comment {
-	dtoc := make([]*dto.Comment, len(daoC))
-	for i, daoc := range daoC {
-		dtoc[i].ID = daoc.ID
-		dtoc[i].Thread = daoc.Thread
-		dtoc[i].User = daoc.User
-		dtoc[i].Grip = daoc.Grip
-		dtoc[i].Body = daoc.Body
-		dtoc[i].Color = daoc.Color
-		dtoc[i].CreatedAt = daoc.CreatedAt
-		dtoc[i].UpdatedAt = daoc.UpdatedAt
-		dtoc[i].DeletedAt = daoc.DeletedAt
-	}
-	return dtoc
-}
-
-func isOP(opID uuid.UUID, comments ...*dto.Comment) {
-	for _, c := range comments {
-		c.IsOP = opID == c.User
+func toDtoComment(daoc *dao.Comment) *dto.Comment {
+	return &dto.Comment{
+		ID:        daoc.ID,
+		Thread:    daoc.Thread,
+		User:      daoc.User,
+		Grip:      daoc.Grip,
+		Body:      daoc.Body,
+		Color:     daoc.Color,
+		IsOP:      daoc.IsOP,
+		CreatedAt: daoc.CreatedAt,
+		UpdatedAt: daoc.UpdatedAt,
+		DeletedAt: daoc.DeletedAt,
 	}
 }

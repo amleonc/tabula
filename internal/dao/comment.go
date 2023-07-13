@@ -9,12 +9,12 @@ import (
 
 type Comment struct {
 	bun.BaseModel `bun:"table:comments"`
-	ID            uuid.UUID  `bun:"type:uuid,default:uuid_generate_v4()"`
+	ID            uuid.UUID  `bun:"type:uuid,default:gen_random_uuid()"`
 	Media         string     `bun:",nullzero"`
 	Thread        uuid.UUID  `bun:",notnull"`
 	User          uuid.UUID  `bun:",notnull"`
 	Grip          string     `bun:",notnull"`
-	Body          string     `bun:",unique,notnull"`
+	Body          string     `bun:",notnull"`
 	Color         uint8      `bun:",notnull"`
 	IsOP          bool       `bun:",nullzero,notnull,default:false"`
 	CreatedAt     *time.Time `bun:",nullzero,notnull,default:current_timestamp"`

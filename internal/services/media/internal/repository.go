@@ -15,7 +15,7 @@ func (Repo) Insert(ctx context.Context, m *dao.Media) (*dao.Media, error) {
 }
 
 func (Repo) Select(ctx context.Context, m *dao.Media) (*dao.Media, error) {
-	r, err := db.SelectOne(ctx, m, "id", m.ID, "*")
+	r, err := db.SelectOne(ctx, m, db.Filter{"id": m.ID}, "*")
 	if err != nil {
 		return nil, err
 	}

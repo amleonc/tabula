@@ -9,11 +9,11 @@ import (
 
 type Thread struct {
 	bun.BaseModel `bun:"table:threads"`
-	ID            uuid.UUID  `bun:"type:uuid,default:uuid_generate_v4()"`
+	ID            uuid.UUID  `bun:"type:uuid,default:gen_random_uuid()"`
 	Media         string     `bun:",notnull"`
 	Topic         uuid.UUID  `bun:",notnull"`
 	User          uuid.UUID  `bun:",notnull"`
-	Title         string     `bun:",unique,notnull"`
+	Title         string     `bun:",notnull"`
 	Body          string     `bun:",notnull"`
 	NSFW          bool       `bun:",notnull,default:false"`
 	CreatedAt     *time.Time `bun:",nullzero,notnull,default:current_timestamp"`

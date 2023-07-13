@@ -14,8 +14,6 @@ import (
 func TokenWithClaims(claims map[string]any) (string, error) {
 	now := time.Now()
 	t, err := jwt.NewBuilder().
-		Issuer("tabula").
-		Audience([]string{"tabula-user"}).
 		IssuedAt(now).
 		Expiration(now.Add(time.Hour * 24 * 30)).
 		Build()
@@ -43,13 +41,12 @@ func ClaimsFromToken(ctx context.Context, t jwt.Token) (map[string]any, error) {
 	return claims, nil
 }
 
-func UserIDFromToken(ctx context.Context, i any) (uuid.UUID, error) {
-	t := i.(jwt.Token)
+func UserIDFromToken(ctx context.Context, t jwt.Token) (uuid.UUID, error) {
 	claims, err := ClaimsFromToken(ctx, t)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	s := claims["id"].(string)
+	s := claims["uid"].(string)
 	id, err := uuid.FromString(s)
 	if err != nil {
 		return uuid.UUID{}, err

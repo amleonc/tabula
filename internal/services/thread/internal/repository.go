@@ -15,16 +15,17 @@ func (Repostiroy) Create(ctx context.Context, t *dao.Thread) error {
 }
 
 func (Repostiroy) SelectByID(ctx context.Context, id uuid.UUID) (*dao.Thread, error) {
-	return db.SelectOne(ctx, &dao.Thread{}, "id", id, "*")
+	return db.SelectOne(ctx, &dao.Thread{}, db.Filter{"id": id}, "*")
 }
 
 func (Repostiroy) SelectByTopicID(ctx context.Context, id uuid.UUID, limit int) ([]*dao.Thread, error) {
 	t := make([]*dao.Thread, 0)
 	err := db.SelectMultiple(
 		ctx,
-		t,
-		"topic",
-		id,
+		&t,
+		map[string]any{
+			"topic": id.String(),
+		},
 		limit,
 		"*",
 	)

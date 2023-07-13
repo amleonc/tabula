@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/amleonc/tabula/config"
 	"github.com/amleonc/tabula/internal/dto"
 	"github.com/amleonc/tabula/internal/helpers/tokens"
 	"github.com/amleonc/tabula/internal/web/internal"
@@ -21,21 +22,33 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.NewErrorResponse(http.StatusBadRequest, err))
 	}
-	token, err := tokens.TokenWithClaims(map[string]any{
-		"id":   u.ID,
-		"role": u.Role,
-		"name": u.Name,
-	})
+	token, err := buildJWTToken(u.ID, u.Role, u.Name)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.NewErrorResponse(http.StatusBadRequest, err))
 	}
-	expires := time.Now().Add(time.Hour * 24 * 30)
-	tc := http.Cookie{
-		Name:    "jwt",
-		Value:   token,
-		Expires: expires,
-		Secure:  true,
-	}
-	c.SetCookie(&tc)
+	tc := buildJWTCookie(token)
+	c.SetCookie(tc)
 	return c.JSON(http.StatusCreated, responses.NewSuccessResponse(http.StatusCreated, u))
+}
+
+func buildJWTToken(id, role, name any) (string, error) {
+	t, err := tokens.TokenWithClaims(map[string]any{
+		"uid":  id,
+		"role": role,
+		"name": name,
+	})
+	return t, err
+}
+
+func buildJWTCookie(t string) *http.Cookie {
+	exp := time.Now().Add(time.Hour * 24 * 30)
+	c := http.Cookie{
+		Name:    "jwt",
+		Value:   t,
+		Expires: exp,
+	}
+	if config.AppEnv() != "dev" {
+		c.Secure = true
+	}
+	return &c
 }
