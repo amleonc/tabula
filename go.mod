@@ -3,9 +3,9 @@ module github.com/amleonc/tabula
 go 1.20
 
 require (
+	github.com/amleonc/echo-middleware-jwx v0.1.0
 	github.com/amleonc/evalrunes v0.0.0-20230612055629-134c155297c1
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/labstack/gommon v0.4.0
 	github.com/lestrrat-go/jwx/v2 v2.0.11
@@ -18,16 +18,15 @@ require (
 )
 
 require (
-	github.com/amleonc/echo-middleware-jwx v0.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
+	github.com/lestrrat-go/echo-middleware-jwx v0.0.0-20210901014158-a7763b9faf66 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
