@@ -195,7 +195,7 @@ func isBlacklisted(m *dao.Media) error { // -
 
 func daoToDto(daom *dao.Media) *dto.Media {
 	m := &dto.Media{
-		ID:           daom.ID,
+		Id:           daom.ID,
 		Url:          fmt.Sprintf("%s.%s", daom.ID, daom.Extension),
 		ThumbnailUrl: fmt.Sprintf("%s%s.%s", thumbnailPrefix, daom.ID, defaultThumbnailFormat),
 		Type:         daom.Type,

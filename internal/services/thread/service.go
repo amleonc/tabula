@@ -64,7 +64,7 @@ func (s *serviceStruct) Create(ctx context.Context, t *dto.Thread) (*dto.Thread,
 		return nil, err
 	}
 	daoT := &dao.Thread{
-		Media: t.Media.ID,
+		Media: t.Media.Id,
 		Topic: t.Topic,
 		User:  t.User,
 		Title: t.Title,

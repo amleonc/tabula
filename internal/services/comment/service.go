@@ -62,7 +62,7 @@ func (s *serviceStruct) Create(ctx context.Context, c *dto.Comment) (*dto.Commen
 	c.Grip = generateGrip()
 	c.Color = randColor()
 	daoC := &dao.Comment{
-		Media:  m.ID,
+		Media:  m.Id,
 		Thread: c.Thread,
 		User:   c.User,
 		Grip:   c.Grip,
